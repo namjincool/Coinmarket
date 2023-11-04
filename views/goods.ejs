@@ -1,0 +1,267 @@
+<!--검색 시 검색 된 물품을 보여주는 페이지 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css"/>
+    <style>
+        /* google font: Noto Sans KR */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap');
+
+        :root {
+            --color-signature: #3585c1;
+            --color-carrot-market: #ff8a3d;
+            --color-joonggonara: #e8344e;
+            --color-hello-market: #0484f6;
+
+            --white-normal: #fafafa;
+            --white-dark: #f3f3f3;
+
+            --purple-normal: #a238d9;
+            --purple-highlight: #C338FA;
+
+            --black-normal: #18191A;
+
+            --grey-normal: #242526;
+            --grey-light: #3a3b3c;
+            --grey-lighter: #ACAFB3;
+
+            --text-smaller: 0.8rem;
+            --text-small: 1.1rem;
+            --text-normal: 1.25rem;
+            --text-littlebig: 2rem;
+            --text-big: 3rem;
+            --text-ultrabig: 5rem;
+        }
+
+
+
+        
+        * {
+            margin: 0px;
+            padding: 0px;
+            box-sizing: content-box;
+        }
+
+        body {
+            height: 100%;
+            background-image: url('../static/main_background.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            font-size: 10px;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .wrap {
+            width: 800px;
+            margin: 0px auto;
+            text-align: center;
+        }
+
+        #header {
+            text-align: left;
+        }
+
+        #header > h1, #header > h2 {
+            display: inline-block;
+            color: var(--black-normal);
+        }
+
+        #header > h1 {
+            font-weight: normal;
+            font-size: var(--text-littlebig);
+        }
+
+        #header > h2 {
+            font-weight: lighter;
+            font-size: var(--text-normal);
+        }
+
+        #back-button {
+            background-color: transparent;
+            display: inline-block;
+            border: none;
+            padding-top: 0px;
+            padding-left: 5px;
+            padding-right: 10px;
+            color: var(--black-normal);
+        }
+
+        /* Search box */
+        /* https://stackoverflow.com/questions/15314407/how-to-add-button-inside-input */
+        #search-box {
+            background-color: transparent;
+            margin-top: 15px;
+
+            height: 30px;
+            padding: 5px 20px;
+            border: 1px solid var(--color-signature);
+            border-radius: 20px;
+
+            /* This bit sets up the horizontal layout */
+            display: flex;
+            flex-direction: row;
+        }
+
+        #search-box > input {
+            background-color: transparent;
+            font-size: var(--text-small);
+
+            /* Tell the input to use all the available space */
+            flex-grow: 2;
+            /* And hide the input's outline, so the form looks like the outline */
+            border: none;
+        }
+
+        #search-box > input:focus {
+            /* removing the input focus blue box. Put this on the form if you like. */
+            outline: none;
+        }
+
+        #search-box > button {
+            width: 30px;
+            height: 30px;
+            vertical-align: center;
+            background-color: var(--color-signature);
+            border: transparent;
+            border-radius: 15px;
+            color: white;
+        }
+
+        /* goods */
+        #goods-box {
+            /*background-color: aqua;*/
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .goods-card {
+            /*background-color: var(--white-dark);*/
+            /*border-radius: 3px;*/
+            display: inline-block;
+            width: 192px;
+            box-sizing: border-box;
+            padding: 10px 10px 10px 10px;
+            color: var(--white-normal);
+        }
+
+        .goods-card-img {
+
+            /* 이미지의 크기가 표시하려는 영역의 크기와 일치하지 않아도 이미지의 전체 영역이 보여질 수 있도록 합니다. */
+            background-size: cover;
+            background-position: center;
+
+            border-radius: 3px;
+
+            /* 이미지의 비율이 1:1이 아니더라도 stretch되지 않도록 막습니다. */
+            width: 172px;
+            min-height: 172px;
+            object-fit: cover;
+        }
+
+        .goods-card-name {
+            /*background-color: cadetblue;*/
+            margin: 10px 0px 0px 0px;
+            font-weight: bold;
+            font-size: var(--text-smaller);
+            color: var(--black-normal);
+        }
+
+        .goods-card-price {
+            /*background-color: lightsalmon;*/
+            margin: 0px 0px 0px 0px;
+            font-weight: lighter;
+            font-size: var(--text-smaller);
+            color: var(--color-signature);
+        }
+
+        #goods-not-found-alert-box {
+            font-size: var(--text-normal);
+        }
+
+    </style>
+
+    <script>
+        function addImageToSlideshow(imageUrl) {
+            let html_template = `<div class="goods-slideshow-img-box">
+                                    <img class="goods-slideshow-img" src="${imageUrl}">
+                                </div>`;
+        
+            $('#goods-slideshow').append(html_template);
+            //initializeSlick(); // 슬라이더 초기화
+        }
+        
+        // 이미지 추가 및 서버로 전송
+        function onChangeUploadImageInput() {
+            let file = $('#upload-image-input')[0].files[0];
+            let form_data = new FormData();
+            form_data.append("file_give", file);
+        
+            $.ajax({
+                type: "POST",
+                url: "/goods/image",
+                data: form_data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    if (response['success']) {
+                        let image = response['image'];
+        
+                        // 이미지 URL 생성 및 추가
+                        let imageUrl = `/uploads/${image}`; // 이미지 파일의 경로 생성
+                        addImageToSlideshow(imageUrl);
+                    }
+                }
+            });
+        }
+        function onClickSearch() {
+            let keywords = $('#search-keyword').val();
+
+            window.location.href = `/goods/search?keywords=${keywords}`;
+        }
+    </script>
+</head>
+<body>
+<div class="wrap">
+    <div id="header">
+        <button id="back-button" class="fas fa-angle-left fa-3x" onclick="window.location.href='/'"
+                type="button"></button>
+        <h1><%= keywords %></h1>
+        <h2> 로 찾은 물건들이예요</h2>
+    </div>
+
+    <div id="search-box">
+        <input id="search-keyword" placeholder="검색어를 입력하세요." value="<%= keywords %>">
+        <button id="search-button" class="fa fa-search" type="button" onclick="onClickSearch()">검색</button>
+    </div>
+    
+    <div id="goods-box">
+        <% if (searched_goods.length > 0) { %>
+            <% searched_goods.forEach(goods => { %>
+                <div class="goods-card">
+                    <img class="goods-card-img" src="<%= goods.image_url %>" alt="Card image cap">
+                    <!-- imageURL 변수에 이미지 URL이 저장되어 있다고 가정합니다 -->
+                    <div class="goods-card-body">
+                        <a class="goods-card-name" href="/goods/read/<%= goods.goods_id %>"><%= goods.title %></a>
+                        <p class="goods-card-price"><%= goods.price %>원</p>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div id="goods-not-found-alert-box">
+                <p>"<%= keywords %>" 검색어로 찾은 물건의 결과가 없습니다 😅</p>
+                <p>다른 검색어로 검색해보시겠어요?</p>
+            </div>
+        <% } %>
+    </div>
+    
+    
+</div>
+</body>
+</html>

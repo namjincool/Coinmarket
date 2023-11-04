@@ -1,0 +1,318 @@
+<!--물품 등록 페이지-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- slick: Slideshow library (need jQuery) -->
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.css"/>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css"/>
+    <style>
+        /* google font: Noto Sans KR */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap');
+
+        :root {
+            --color-signature: #3585c1;
+            --color-carrot-market: #ff8a3d;
+            --color-joonggonara: #e8344e;
+            --color-hello-market: #0484f6;
+
+            --white-normal: #fafafa;
+            --white-dark: #f3f3f3;
+
+            --purple-normal: #a238d9;
+            --purple-highlight: #C338FA;
+
+            --black-normal: #18191A;
+
+            --grey-normal: #242526;
+            --grey-light: #3a3b3c;
+            --grey-lighter: #ACAFB3;
+
+            --red-normal: #ff0000;
+
+            --text-smaller: 0.8rem;
+            --text-small: 1.1rem;
+            --text-normal: 1.25rem;
+            --text-littlebig: 2rem;
+            --text-big: 3rem;
+            --text-ultrabig: 5rem;
+        }
+
+        * {
+            margin: 0px;
+            padding: 0px;
+            box-sizing: border-box;
+        }
+
+        input, textarea {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: normal;
+        }
+
+        body {
+            height: 100%;
+            background-image: url('../static/main_background.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            font-size: 10px;
+            font-family: 'Noto Sans KR', sans-serif;
+
+            display: flex;
+            flex-flow: column;
+        }
+
+        .wrap {
+            width: 800px;
+            margin: 0px auto;
+            text-align: center;
+        }
+
+        #header {
+            display: flex;
+            flex-flow: row;
+        }
+
+        #header > #back-button-box {
+            display: inline;
+            flex-grow: 1;
+        }
+
+        #header > #back-button-box > #back-button {
+            background-color: transparent;
+            height: 100%;
+            display: inline-block;
+            border: none;
+            color: var(--black-normal);
+            float: left;
+            padding: 0px 20px;
+        }
+        #header > #title-box {
+            flex-grow: 5;
+        }
+        #title-box {
+            display: inline-block;
+            font-weight: normal;
+            font-size: var(--text-littlebig);
+            color: var(--black-normal);
+        }
+        #confirm-button-box {
+            display: inline;
+            flex-grow: 1;
+        }
+        #confirm-button-box > #confirm-button {
+            background-color: transparent;
+            height: 100%;
+            display: inline-block;
+            border: none;
+            float: right;
+            padding: 0px 20px;
+            color: var(--black-normal);
+            font-size: var(--text-normal);
+        }
+        #contents {
+            margin-top: 20px;
+            padding: 0px 40px;
+        }
+        input.text-line {
+            width: 100%;
+            font-weight: normal;
+            font-size: var(--text-normal);
+            background-color: transparent;
+            color: var(--black-normal);
+            outline: none;
+            outline-style: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            border-bottom: 1px solid var(--grey-lighter);
+            padding: 3px 10px;
+        }
+        #goods-name, #goods-price, #goods-description {
+            margin-top: 40px;
+        }
+        #goods-description, #goods-description-box, #goods-description {
+            border: none;
+            width: 100%;
+            font-weight: normal;
+            font-size: var(--text-normal);
+            resize: none;
+            overflow-y: hidden; /* prevents scroll bar flash */
+            line-height: 1.6;
+        }
+        #goods-description:focus {
+            outline: none !important;
+
+        }
+        #goods-slideshow {
+            width: 530px;
+            margin: 0px auto;
+        }
+        #goods-slideshow > .goods-slideshow-img-box {
+        }
+        .slick-slide {
+            margin: 10px;
+        }
+        .slick-slide img {
+            height: 300px;
+            border: 2px solid #fff;
+            background-size: cover;
+            background-position: center;
+            object-fit: cover;
+        }
+        .slick-next::before, .slick-prev::before {
+            color: turquoise;
+        }
+    </style>
+    <script>
+        let uploaded_image_list = []
+        $(document).ready(function () {
+            initializeSlick();
+            initializeTextareaScrollHeightEvent();
+        });
+        function initializeSlick() {
+            $('#goods-slideshow').slick({
+                dots: true,
+                arrows: true,
+                responsive: true,
+                centerMode: true,
+                speed: 1000,
+                easing: 'easeInOutQuart'
+            });
+            console.log('slick initialized!');
+        }
+        function initializeTextareaScrollHeightEvent() {
+            $(document).ready(function () {
+                $('#goods-description-box').on('keyup', 'textarea', function (e) {
+                    $(this).css('height', 'auto');
+                    $(this).height(this.scrollHeight);
+                });
+                $('#goods-description-box').find('textarea').keyup();
+            });
+        }
+function addImageToSlideshow(imageUrl) {
+    let html_template = `<div class="goods-slideshow-img-box">
+                            <img class="goods-slideshow-img" src="${imageUrl}">
+                        </div>`;
+
+    $('#goods-slideshow').append(html_template);
+    initializeSlick(); // 슬라이더 초기화
+}
+function onChangeUploadImageInput() {
+    let file = $('#upload-image-input')[0].files[0];
+    let form_data = new FormData();
+    form_data.append("file_give", file);
+
+    $.ajax({
+        type: "POST",
+        url: "/goods/image",
+        data: form_data,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function (response) {
+            if (response['success']) {
+                let image = response['image'];
+                uploaded_image_list.push(image);
+
+                // 업로드한 이미지 파일명 표시
+                let filename = image.split('/').pop(); // 이미지 경로에서 파일명 추출
+                $('#uploaded-image-filename').text(filename);
+
+                addImageToSlideshow(image);
+            }
+        }
+    });
+}
+        function onClickBack() {
+            window.location.href = '/'
+        }
+        function onClickConfirm() {
+            let goods_name = $('#goods-name').val()
+            let goods_price = $('#goods-price').val()
+            let goods_desc = $('#goods-description').val()
+            if (goods_name.length == 0) {
+                alert('제목을 입력해주세요.')
+            } else if (goods_price.length == 0) {
+                alert('가격을 입력해주세요.')
+            } else if (goods_desc.length == 0) {
+                alert('내용을 입력해주세요.')
+            } else {
+                let formData = new FormData();
+                // 이미지 업로드한 파일들 추가
+                for (let i = 0; i < uploaded_image_list.length; i++) {
+                    formData.append('images_give', uploaded_image_list[i]);
+                }
+                // 기타 데이터 추가
+                formData.append('title_give', goods_name);
+                formData.append('price_give', goods_price);
+                formData.append('desc_give', goods_desc);
+                $.ajax({
+                    type: 'POST',
+                    url: '/goods/create',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        alert(response['msg']);
+                        window.location.href = '/';
+                    },
+                    error: function(error) {
+                        console.error('물품 데이터 삽입 및 이미지 업로드 에러:', error);
+                        alert('물품 등록에 실패했습니다.');
+                    }
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="wrap">
+    <div id="header">
+        <div id="back-button-box">
+            <button id="back-button" class="fas fa-angle-left fa-3x" onclick="onClickBack()" type="button"></button>
+        </div>
+        <div id="title-box">
+            <p>물건 등록</p>
+        </div>
+        <div id="confirm-button-box">
+            <button id="confirm-button" onclick="onClickConfirm()" type="button">완료</button>
+        </div>
+    </div>
+    <div id="contents">
+        <div>
+            <input id="upload-image-input" onchange="onChangeUploadImageInput()" class="file-input" type="file" name="images_give" 
+                   accept="image/png, image/jpg, image/jpeg, image/gif">
+        </div>
+        <div id="goods-slideshow">
+        </div>
+        <div>
+            <input id="goods-name" type="text" class="text-line" placeholder="글 제목을 입력해주세요"/>
+        </div>
+        <div>
+            <input id="goods-price" type="number" class="text-line" placeholder="희망하는 가격을 입력해주세요"/>
+        </div>
+        <select>
+            <option value="aa">aa</option>
+            <option value="bb">bb</option>
+            <option value="cc">cc</option>
+            <option value="dd">dd</option>
+            <option value="ee">ee</option>
+            <option value="ff">ff</option>
+        </select>
+        <div id="goods-description-box">
+            <textarea id="goods-description" , style="margin-left: 10px" placeholder="제품에 대한 설명을 적어주세요"></textarea>
+        </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

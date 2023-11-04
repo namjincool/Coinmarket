@@ -1,0 +1,246 @@
+<!-- goods_info.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+    <!-- ... (다른 스타일 시트) ... -->
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <!-- Socket.io -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <title>항해샵</title>
+
+    <style>
+        .info-wrap {
+            text-align: center;
+            width: 500px;
+            height: 400px;
+            margin: 10% auto auto;
+        }
+
+        body {
+            height: 100%;
+            background-image: url('/static/main_background.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        /* 스타일링 추가: 채팅 창 */
+        .chat-container {
+            width: 400px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .chat-messages {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .chat-input {
+            display: flex;
+        }
+
+        .chat-input input[type="text"] {
+            flex: 1;
+            padding: 5px;
+        }
+
+        .chat-input button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+        }
+
+        /* 채팅 메시지 스타일링 */
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            border-radius: 10px;
+            max-width: 70%; /* 메시지 너비 제한 */
+        }
+
+        .chat-message-user {
+            background-color: #007bff;
+            color: #fff;
+            float: right;
+        }
+
+        .chat-message-other {
+            background-color: #ccc;
+            float: left;
+        }
+    </style>
+</head>
+
+<body>
+<!-- 이미지 슬라이드 -->
+<div class="container" style="width: 500px; height: 400px; padding-top: 5%">
+    <div id="myCarousel" class="carousel slide" data-ride="carousel">
+        <!-- Indicators -->
+        <% for (let i = 0; i < images.length; i++) { %>
+            <li data-target="#myCarousel" data-slide-to="<%= i %>" <% if (i === 0) { %>class="active"<% } %>></li>
+        <% } %>
+
+        <!-- Wrapper for slides -->
+        <div id="goods-image-box" class="carousel-inner">
+            <% for (let i = 0; i < images.length; i++) { %>
+                <div class="item <%= i === 0 ? 'active' : '' %>">
+                    <img src="<%= images[i] %>" style="width: 500px; height: 400px">
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Left and right controls -->
+        <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+            <span class="glyphicon glyphicon-chevron-left"></span>
+            <span class="sr-only">Previous</span>
+        </a>
+        <a class="right carousel-control" href="#myCarousel" data-slide="next">
+            <span class="glyphicon glyphicon-chevron-right"></span>
+            <span class="sr-only">Next</span>
+        </a>
+    </div>
+</div>
+<div class="info-wrap" id="goods-info">
+    <h1><%= title %></h1>
+    <p style="text-align: left"><%= seller_id %></p>
+    <br><br>
+    <h3><%= desc %></h3>
+    <br><br>
+    <input type="hidden" id="user_id" value="<%= user_id %>">
+    <p style="text-align: left">금액 : <span id="price-value"><%= price %></span></p>
+    <p style="text-align: left">비트 코인 금액 : <span id="bit-value"><%= bit %></span></p>
+    <p style="text-align: left">금액에 비트 값 : <span id="result-value"></span>비트</p>
+    <p style="text-align: right">
+          <button type="button" class="btn btn-success" id="contact-button" data-seller-id="<%= seller_id %>">
+            연락하기
+        </button>
+        <i class="fa fa-heart" aria-hidden="true"></i>
+    </p>
+    <br><br>
+    <p style="text-align: right">
+        <button type="button" class="btn btn-success like-button" data-goods-id="<%= goodsId %>">
+            <i class="fa fa-heart" aria-hidden="true"></i> 좋아요
+        </button>
+        <span class="likes-count"><%= likesCount %> 좋아요</span>
+    </p>
+</div>
+<script>
+const socket2 = io();
+const chatContainer = document.getElementById('chat-container');
+const chatMessages = document.getElementById('chat-messages');
+const chatInput = document.getElementById('chat-input');
+const sendChatButton = document.getElementById('send-chat');
+const contactButton = document.getElementById('contact-button');
+let roomName = null; // 채팅 방 이름
+const currentUserID = '<%= user_id %>'; // 현재 사용자 ID 설정
+const goodsinfoname = '<%= goodsId %>';
+const goodsinfoprice = '<%= price %>';
+// 연락하기 버튼 클릭 시 채팅 창 열기
+    contactButton.addEventListener('click', () => {
+    const sellerId = contactButton.getAttribute('data-seller-id');
+    // 사용자 ID와 판매자 ID를 서버로 전송하여 채팅 방 생성
+    socket2.emit('startChat', { sellerId ,goodsinfoname,goodsinfoprice});
+    window.location.href = '/userMessages';
+});
+
+</script>
+
+<script>
+    const socket = new WebSocket('wss://localhost:8082'); // WebSocket URL을 여기에 입력
+    socket.onmessage = function (event) {
+      const marketData = JSON.parse(event.data);
+      if (marketData && marketData.length > 0) {
+        const tradePrice = marketData[0].trade_price; // 첫 번째 항목의 trade_price를 가져옴
+        document.getElementById('price-value').textContent = tradePrice; // 화면에 업데이트
+      }
+    };
+    </script>
+<script>
+    // 좋아요 버튼 클릭 처리
+    $(document).ready(function () {
+        $('.like-button').click(function () {
+            const goodsId = $(this).data('goods-id');
+            const $likesCount = $(this).siblings('.likes-count');
+
+            // 서버에 아이템의 좋아요 업데이트 요청 보내기
+            $.ajax({
+                url: `/goods/${goodsId}/like`,
+                type: 'POST',
+                success: function (response) {
+                    if (response.success) {
+                        // 프론트엔드에서 좋아요 수 업데이트
+                        $likesCount.text(`${response.likesCount} 좋아요`);
+                    } else {
+                        console.error('좋아요 업데이트 실패:', response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('AJAX 오류:', error);
+                }
+            });
+        });
+        $('#contact-button').click(function (){
+            window.location.href='/userMessages';
+        });
+    });
+</script>
+<script>
+    // 2초마다 비트코인 가격 업데이트
+    const updateBitPrice = async () => {
+      try {
+        const response = await fetch('/getBitcoinPrice');
+        const data = await response.json();
+        const bitcoinPrice = parseFloat(data.bit); // 데이터를 숫자로 변환
+        const price = parseFloat(<%= price %>); // 서버에서 가져온 가격 데이터를 숫자로 변환
+        const bitandprice = price / bitcoinPrice; // 나눗셈 수행
+  
+        // HTML 엘리먼트 업데이트
+        const bitValueElement1 = document.getElementById('bit-value');
+        const bitValueElement2 = document.getElementById('result-value');
+        bitValueElement1.textContent = bitcoinPrice;
+        bitValueElement2.textContent = bitandprice;
+      } catch (error) {
+        console.error('비트코인 가격을 가져오는 중 오류 발생:', error);
+      }
+    };
+  
+    window.addEventListener('load', () => {
+      updateBitPrice(); // 페이지 로드 시 한 번 실행
+      setInterval(() => {
+        updateBitPrice();
+      }, 1000); // 2초 (2000밀리초)마다 업데이트
+    });
+  </script>
+    
+</body>
+</html>

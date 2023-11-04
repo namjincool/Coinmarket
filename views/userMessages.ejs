@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Messages</title>
+    <style>
+        /* 스타일 설정 */
+        .message-card {
+            /* 카드 스타일 설정 */
+            border: 1px solid #ccc;
+            margin: 10px;
+            padding: 10px;
+            box-shadow: 0 0 5px #aaa;
+            cursor: pointer; /* 마우스 커서를 포인터로 변경하여 클릭 가능하도록 설정 */
+        }
+        .chat-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-shadow: 0 0 5px #aaa;
+            height: 300px;
+            overflow-y: scroll;
+        }
+        .message {
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        .left-message {
+    text-align: left;
+    color: #fff;
+    background-color: #3b3a3a;
+    border: 2px solid rgb(79, 79, 74); /* 테두리 색을 검은색으로 설정 */
+}
+.right-message {
+    text-align: right;
+    background-color: #ffffff;
+    color: black;
+    border: 2px solid rgb(154, 154, 154); /* 테두리 색을 검은색으로 설정 */
+}
+
+
+
+    </style>
+</head>
+<body>
+    <h1>사용자 메시지 목록</h1>
+    <h2>사용자 ID: <span id="userId"><%= userId %></span></h2>
+    <div id="message-cards">
+        <% for (let i = 0; i < uniqueMessages.length; i++) { %>
+            <div class="message-card" data-room-id="<%= uniqueMessages[i].id %>",
+                 data-goods-info="<%= uniqueMessages[i].goods_info %>",
+                 data-seller-id="<%= uniqueMessages[i].seller %>",
+                 data-user-id="<%= uniqueMessages[i].user_id %>",
+                 data-user-state="<%= uniqueMessages[i].state %>",
+                 data-user-price="<%= uniqueMessages[i].goods_price %>">
+                <p><strong>채팅방 ID:</strong> <%= uniqueMessages[i].id %></p>
+                <p><strong>상품 정보:</strong> <%= uniqueMessages[i].goods_info %></p>
+                <p><strong>판매자 ID:</strong> <%= uniqueMessages[i].seller %></p>
+                <p><strong>구매자 ID:</strong> <%= uniqueMessages[i].user_id %></p>
+                <p><strong>금액 :</strong> <%= uniqueMessages[i].goods_price %></p>
+                
+                <p><strong>거래상태:</strong> <span class="state-text"><%= uniqueMessages[i].state %></span></p>
+            </div>
+        <% } %>
+    </div>
+    <div id="chat-room" style="display: none;">
+        <div class="chat-box">
+        </div>
+        <input type="text" id="message-input" placeholder="메시지 입력">
+        <button onclick="sendMessage()">보내기</button>
+        <button id="snedState" onclick="snedState()">거래하기</button>
+        <button id="paycoin" onclick="paycoin()">송금하기</button>
+    </div>
+    <script>
+        let chatRoomId = ''; 
+        let goodsInfo = '';
+        let sellerId = '';
+        let userId = '';
+        let state = '';
+        let price = '';
+        const chatRoom = document.querySelector('#chat-room');
+        const messageInput = document.querySelector('#message-input');
+        const serverUrl = 'ws://localhost:8083'; 
+        let currentChatRoomId = null;
+        document.querySelectorAll(".message-card").forEach((card) => {
+        card.addEventListener("click", () => {
+        chatRoomId = card.getAttribute("data-room-id"); 
+        goodsInfo =card.getAttribute("data-goods-info");
+        sellerId = card.getAttribute("data-seller-id");
+        userId = card.getAttribute("data-user-id");
+        state = card.getAttribute("data-user-state");
+        price = card.getAttribute("data-user-price");
+        console.log(chatRoomId);
+        console.log(goodsInfo);
+        console.log(sellerId);
+        console.log(userId);
+        console.log(state);
+        var snedStateButton = document.getElementById("snedState");
+        var paycoinbutton = document.getElementById("paycoin");
+        if  (state === "") {
+            snedStateButton.style.display = "block";
+            paycoinbutton.style.display = "none";
+        }
+        else if  (state === "1") {
+            snedStateButton.style.display = "none";
+            paycoinbutton.style.display = "block";
+        } else if (state === "2") {
+            snedStateButton.style.display = "none";
+            paycoinbutton.style.display = "none";
+        }
+                let chatBox = chatRoom.querySelector('.chat-box');
+                if (currentChatRoomId === chatRoomId) {
+                    chatRoom.style.display = 'none';
+                    currentChatRoomId = null;
+                } else {
+                    currentChatRoomId = chatRoomId;
+                    chatBox.innerHTML = ""; 
+                    chatRoom.style.display = 'block'; 
+                    const loginUserId = document.querySelector("#userId").textContent;
+                    fetch(`/getChatRoomData?id=${chatRoomId}&loginUserId=${loginUserId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            data.forEach(message => {
+                                const messageElement = document.createElement("div");
+                                messageElement.textContent = `${message.sender_id}: ${message.message}`;
+                                messageElement.classList.add("message");
+                                if (message.sender_id === loginUserId) {
+                                    messageElement.classList.add("right-message");
+                                } else {
+                                    messageElement.classList.add("left-message");
+                                }
+                                chatBox.appendChild(messageElement);
+                            });
+                        })
+                        .catch(error => console.error("데이터 가져오기 오류:", error));
+                }
+            });
+        });
+        function paycoin() {
+        const loginUserId = document.querySelector("#userId").textContent;
+        const chatBox = chatRoom.querySelector('.chat-box');
+        const rid = sellerId;
+        const price2 = price;
+        const roomid = chatRoomId;
+        const goodsid = goodsInfo;
+        const cid = userId; 
+        console.log("result", rid);
+        const messageElement = document.createElement("div");
+        messageElement.textContent = `${loginUserId}:`;
+        const messagedbin = messageInput.value;
+        console.log("messagedbin",messagedbin);
+        fetch('/paycoin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userid: rid,
+                price:price2,
+                userid: loginUserId,
+                roomid: roomid,
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "Message sent successfully") {
+                    console.log(data.status);
+                }
+            })
+            .catch(error => console.error("메시지 보내기 오류:", error));
+}
+
+    function snedState() {
+        const loginUserId = document.querySelector("#userId").textContent;
+        const chatBox = chatRoom.querySelector('.chat-box');
+        const roomid = chatRoomId;
+        const goodsid2 = goodsInfo;
+        const rid = sellerId; 
+        const cid = userId; 
+        console.log("result", roomid, goodsid2, rid, cid);
+        const messageElement = document.createElement("div");
+        messageElement.textContent = `${loginUserId}:`;
+        const messagedbin = messageInput.value;
+        console.log("messagedbin",messagedbin);
+        fetch('/snedState', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userid: loginUserId,
+                roomid: roomid,
+                goodsid2: goodsid2,
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "Message sent successfully") {
+                    console.log(data.status);
+                }
+            })
+            .catch(error => console.error("메시지 보내기 오류:", error));
+}
+    function sendMessage() {
+    const loginUserId = document.querySelector("#userId").textContent;
+    const messageInputValue = messageInput.value;
+    const chatBox = chatRoom.querySelector('.chat-box');
+    if (messageInputValue.trim() !== "") {
+        const roomid = chatRoomId;
+        const goodsid = goodsInfo;
+        const rid = sellerId; 
+        const cid = userId; 
+        console.log("result", roomid, goodsid, rid, cid,messageInput.value);
+        const messageElement = document.createElement("div");
+        messageElement.textContent = `${loginUserId}: ${messageInputValue}`;
+        messageElement.classList.add("message", "right-message");
+        chatBox.appendChild(messageElement);
+        const messagedbin = messageInput.value;
+        console.log("messagedbin",messagedbin);
+        messageInput.value = "";
+        fetch('/sendMessage', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                roomid: roomid,
+                goodsid: goodsid,
+                rid: rid,
+                cid: cid,
+                messageInput: messagedbin,
+            }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "Message sent successfully") {
+                    console.log(data.status);
+                }
+            })
+            .catch(error => console.error("메시지 보내기 오류:", error));
+    }
+}
+    </script>
+<script>
+    var messageCards = document.querySelectorAll(".message-card");
+
+    messageCards.forEach(function(messageCard) {
+        var stateText = messageCard.querySelector(".state-text");
+        var state = stateText.textContent;
+        if  (state === "") {
+            stateText.textContent = "-";
+        }
+        else if  (state === "1") {
+            stateText.textContent = "예약중";
+        } else if (state === "2") {
+            stateText.textContent = "거래완료";
+        }
+    });
+</script>
+
+    
+</body>
+</html>

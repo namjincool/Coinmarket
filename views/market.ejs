@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link rel="stylesheet" href="styles.css"/>
+
+
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css"/>
+
+
+    <style>
+        /* google font: Noto Sans KR */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap');
+
+        :root {
+            --color-signature: #3585c1;
+            --color-carrot-market: #ff8a3d;
+            --color-joonggonara: #e8344e;
+            --color-hello-market: #0484f6;
+
+            --white-normal: #fafafa;
+            --white-dark: #f3f3f3;
+
+            --purple-normal: #a238d9;
+            --purple-highlight: #C338FA;
+
+            --black-normal: #18191A;
+
+            --grey-normal: #242526;
+            --grey-light: #3a3b3c;
+            --grey-lighter: #ACAFB3;
+
+            --text-smaller: 0.8rem;
+            --text-small: 1.1rem;
+            --text-normal: 1.25rem;
+            --text-littlebig: 2rem;
+            --text-big: 3rem;
+            --text-ultrabig: 5rem;
+        }
+
+        * {
+            margin: 0px;
+            padding: 0px;
+            box-sizing: content-box;
+        }
+
+        .wrap {
+            width: 800px;
+            margin: 0px auto;
+            text-align: center;
+        }
+
+
+        #header {
+            margin-top: 60px;
+            text-align: left;
+        }
+
+        #header > button {
+            background-color: transparent;
+            display: inline-block;
+            border: none;
+            color: var(--black-normal);
+            font-size: var(--text-small);
+        }
+
+        #title > h1 {
+            font-size: var(--text-ultrabig);
+            color: var(--black-normal);
+            text-shadow: var(--grey-lighter) 2px 2px;
+        }
+
+        #title > h2 {
+            font-weight: lighter;
+            font-size: var(--text-normal);
+            color: var(--black-normal);
+        }
+        #search-box {
+            background-color: transparent;
+            margin-top: 15px;
+
+            height: 30px;
+            padding: 5px 20px;
+            border: 1px solid var(--color-signature);
+            border-radius: 20px;
+
+            /* This bit sets up the horizontal layout */
+            display: flex;
+            flex-direction: row;
+        }
+
+        #search-box > input {
+            background-color: transparent;
+            font-size: var(--text-small);
+
+            /* Tell the input to use all the available space */
+            flex-grow: 2;
+            /* And hide the input's outline, so the form looks like the outline */
+            border: none;
+        }
+
+        #search-box > input:focus {
+            /* removing the input focus blue box. Put this on the form if you like. */
+            outline: none;
+        }
+
+        #search-box > button {
+            width: 30px;
+            height: 30px;
+            vertical-align: center;
+            background-color: var(--color-signature);
+            border: transparent;
+            border-radius: 15px;
+            color: white;
+        }
+
+        #upload-goods-button-box {
+            margin-top: 20px;
+            
+        }
+
+        #upload-goods-button {
+            background-color: var(--color-signature);
+            border: none;
+            padding: 5px 0px;
+            width: 100%;
+            border-radius: 20px;
+
+            font-size: var(--text-normal);
+            font-family: 'Noto Sans KR', sans-serif;
+            color: var(--white-normal);
+        }
+
+        /* goods */
+        #goods-list {
+            /*background-color: aqua;*/
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .goods-item {
+            /*background-color: var(--white-dark);*/
+            /*border-radius: 3px;*/
+            display: inline-block;
+            width: 192px;
+            box-sizing: border-box;
+            padding: 10px 10px 10px 10px;
+            color: var(--white-normal);
+        }
+
+        .goods-img {
+
+            /* 이미지의 크기가 표시하려는 영역의 크기와 일치하지 않아도 이미지의 전체 영역이 보여질 수 있도록 합니다. */
+            background-size: cover;
+            background-position: center;
+
+            border-radius: 3px;
+
+            /* 이미지의 비율이 1:1이 아니더라도 stretch되지 않도록 막습니다. */
+            width: 172px;
+            min-height: 172px;
+            object-fit: cover;
+        }
+
+        .goods-name {
+            /*background-color: cadetblue;*/
+            margin: 10px 0px 0px 0px;
+            font-weight: bold;
+            font-size: var(--text-smaller);
+            color: var(--black-normal);
+        }
+
+        .goods-card-price {
+            /*background-color: lightsalmon;*/
+            margin: 0px 0px 0px 0px;
+            font-weight: lighter;
+            font-size: var(--text-smaller);
+            color: var(--color-signature);
+        }
+
+        #goods-box-header {
+            margin: 30px 0px;
+            text-align: left;
+        }
+
+        #goods-box-header > h1 {
+            font-weight: bold;
+            font-size: var(--text-normal);
+        }
+
+        #goods-box-header > h2 {
+            font-weight: lighter;
+            font-size: var(--text-small);
+        }
+
+    </style>
+</head>
+<body>
+<%- include('navigator.html') %>
+    
+<div class="wrap" id="wrap">
+
+    <div id="header" style="white-space:nowrap">
+        <button id="login-button" type="button">로그인 / 회원가입</button>
+        <button id="logout-button" type="button" style="display: none;">로그아웃</button>
+    </div>
+
+    <div id="title">
+        <h1>상품</h1>
+        <h2>이제는 안전하게 <br>코인으로 중고물품 거래를 해보세요!  </h2>
+    </div>
+    <div id="upload-goods-button-box">
+        <button id="upload-goods-button" type="button">물건 올리기</button>
+    </div>
+    <!--이미지 삽입-->
+    <div class="wrap" id="wrap">
+        <!-- ... -->
+        <div id="goods-list">
+            <% goodsList = goodsList.slice(0, 12); %>
+            <% goodsList.forEach(goods => { %>
+                <div class="goods-item">
+                    <img class="goods-img" src="<%= goods.url %>" alt="물품 이미지">
+                    <p class="goods-name" ><%= goods.title %></h3>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+  
+    <!-- 메인 페이지의 로그인된 사용자 뷰 부분 -->
+    <div id="user-view" style="display: none;">
+        <!-- 여기에 로그인된 사용자 뷰 내용을 추가 -->
+        <p>Welcome, <span id="user-name"></span>!</p>
+    </div>
+</div>
+<script>
+    
+    var jq = jQuery.noConflict();
+
+    jq(document).ready(function () {
+        // 서버에서 로그인 상태 가져오는 Ajax 요청
+        jq.ajax({
+            type: "GET",
+            url: "/get-login-status",
+            success: function (response) {
+                const isLogin = response.isLogin;
+                const userName = response.userName; // 사용자 이름
+    
+                initialize(isLogin, userName);
+            }
+        });
+
+        jq('#wrap').on('click', '#login-button', function () {
+            window.location.href = '/user/login';
+        });
+
+        jq('#wrap').on('click', '#search-button', function () {
+            let keywords = jq('#search-keyword').val();
+            window.location.href = '/goods/search?keywords=' + encodeURIComponent(keywords);;
+        });
+
+        jq('#wrap').on('click', '#upload-goods-button', function () {
+            window.location.href = '/goods/create';
+        });
+        jq('#wrap').on('click', '#logout-button', function () {
+        // 서버에 로그아웃 요청을 보냅니다.
+        jq.ajax({
+            type: "POST",
+            url: "/user/logout", // 로그아웃 처리 라우트로 변경
+            success: function () {
+                window.location.reload();
+            }
+        });
+    });
+        jq('#wrap').on('click', '#my-page-button', function () {
+            window.location.href = '/user/user_info'; // Replace with your actual route
+        });
+    });
+
+    function initialize(isLogin, userName) {
+        if (isLogin) {
+            jq('#login-button').css("display", "none");
+            jq('#logout-button').css("display", "block");
+            // 로그인된 사용자 뷰를 활성화하고 사용자 이름을 설정
+            jq('#user-view').css("display", "block");
+            jq('#user-name').text(userName);
+        } else {
+            jq('#login-button').css("display", "block");
+            jq('#logout-button').css("display", "none");
+            // 로그인된 사용자 뷰를 비활성화
+            jq('#user-view').css("display", "none");
+        }
+    }
+
+    
+</script>
+
+</body>
+</html>

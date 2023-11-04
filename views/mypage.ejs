@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>마이페이지</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Add the CSS from the first HTML code snippet -->
+  <style>
+      /* 스타일 초기화 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+}
+
+/* wrap 스타일링 */
+.wrap {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+#back-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: #333;
+}
+
+#back-button:hover {
+  color: #555;
+}
+
+h1 {
+  font-size: 24px;
+  margin-left: 20px;
+  color: #333;
+}
+
+/* big-button 스타일링 */
+.big-button-box {
+  margin: 10px 0;
+}
+
+.big-button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background-color: #f2f2f2;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.big-button:hover {
+  background-color: #0056b3;
+}
+
+/* table-container 스타일링 */
+.table-container {
+  margin-top: 20px;
+}
+
+h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+
+table th{
+
+}
+table td {
+  padding: 10px;
+  text-align: left;
+}
+
+table th {
+  background-color: #f2f2f2;
+  color: #fff;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #ffff;
+}
+  </style>
+</head>
+
+<body>
+  
+
+  <%- include('navigator.html') %>
+  <div class="wrap">
+      <div id="header">
+          <button id="back-button" class="fas fa-angle-left fa-3x" type="button"></button>
+        <h1>안녕하세요, <%= user_id%> 님!</h1>
+      </div>
+      <div>
+          <div class="big-button-box">
+              <button class="big-button" id="view-liked-button">찜 목록 확인</button>
+          </div>
+
+          <div class="big-button-box">
+              <button class="big-button" id="edit-button">회원 정보 수정</button>
+          </div>
+
+          <div class="big-button-box">
+              <button id="delete-account-button" class="big-button">탈퇴하기</button>
+          </div>
+      </div>
+  </div>
+    <% if (formattedValues.length > 0 && marketDataK.length > 0) { %>
+        <div class="table-container">
+          <h2>Account Data</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>화폐명</th>
+                <th>보유수량</th>
+                <th>락업수량</th>
+                <th>평균매수가격</th>
+                <th>매수평균가 수정 여부</th>
+                <th>구매화폐단위</th>
+                <th>금액</th>
+              </tr>
+            </thead>
+            <tbody id="accountTableBody">
+              <!-- 데이터가 동적으로 추가될 공간 -->
+            </tbody>
+          </table>
+        </div>
+
+        <script>
+            $(document).ready(function() {
+              
+            });
+          </script>
+        <script>
+      
+            const ws = new WebSocket('ws://localhost:8082'); 
+            ws.onopen = () => {
+              console.log('WebSocket connection established');
+              requestAccountData();
+            };
+          
+            ws.onmessage = (event) => {
+          console.log('Received message from server:', event.data);
+          const marketData = JSON.parse(event.data);
+          console.log("mar",marketData);
+          
+          if (marketData.type === 'accountData') {
+            const formattedValues = marketData.data;
+            updateAccountTable(formattedValues);
+            
+          } else {
+            updateMarketData(marketData);
+          }
+        };
+      
+        ws.onclose = () => {
+          console.log('WebSocket connection closed');
+        };
+      
+        function requestAccountData() {
+          // 서버로 데이터 요청 보내고 처리하는 로직 추가
+          // 아래는 axios를 사용하는 예시입니다. 필요에 따라 수정하셔야합니다.
+          axios.get('/api/accountData') // 서버의 API 엔드포인트를 사용한다고 가정하고 URL을 '/api/accountData'로 가정
+            .then(response => {
+              const marketData = response.data;
+              const ma = 
+              updateAccountTable(marketData);
+              console.log("Received account data from server:", marketData);
+            })
+            .catch(error => {
+              console.error('Error fetching account data:', error);
+            });
+        }
+      
+        function updateAccountTable(data, index) {
+        const tableBody = document.querySelector('#accountTableBody');
+        tableBody.innerHTML = ''; // Clear the table body
+      
+        if (data.length > 0) {
+          data.forEach(row => {
+            const tableRow = document.createElement('tr');
+      
+            // Add KRW- prefix to the currency name
+            const currencyCell = document.createElement('td');
+            currencyCell.textContent = `KRW-${row[0]}`;
+            tableRow.appendChild(currencyCell);
+      
+            // Add other columns
+            for (let i = 1; i < row.length; i++) {
+              const cell = document.createElement('td');
+              cell.textContent = row[i];
+              tableRow.appendChild(cell);
+            }
+      
+            // Calculate and add the amount column
+            const amountCell = document.createElement('td');
+            if (row[0] === 'KRW') {
+              amountCell.textContent = row[1]; // If '화폐명' is 'KRW', display '보유수량'
+            } else {
+              const holdingAmount = parseFloat(row[1]);
+              const averagePrice = parseFloat(row[3]);
+              const calculatedAmount = (holdingAmount * averagePrice).toFixed(2);
+              amountCell.textContent = calculatedAmount;
+            }
+            tableRow.appendChild(amountCell);
+      
+            tableBody.appendChild(tableRow);
+          });
+        } else {
+          const noDataRow = document.createElement('tr');
+          const noDataCell = document.createElement('td');
+          noDataCell.setAttribute('colspan', 7); // Considering the additional '금액' column
+          noDataCell.textContent = 'No account data available';
+          noDataRow.appendChild(noDataCell);
+          tableBody.appendChild(noDataRow);
+        }
+      }
+    </script>
+    <script>
+      document.getElementById('view-liked-button').addEventListener('click', function() {
+          const userId = '<%= user_id %>';
+          window.location.href = `/user/${userId}/liked`; // 해당 URL로 이동
+          console.log(userId);
+      });     
+      
+  document.getElementById('edit-button').addEventListener('click', function() {
+      const userId = '<%= user_id %>';
+      window.location.href = `/user/${userId}/enter-password`;
+  });
+  document.getElementById('delete-account-button').addEventListener('click', function() {
+      if (confirm("탈퇴하시겠습니까?")) {
+          const userId = '<%= user_id %>';
+          // Send a POST request to delete the user account
+          fetch(`/user/${userId}/delete`, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ userId: userId })
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  alert(data.message);
+                  // Redirect the user to the login page after successful account deletion
+                  window.location.href = '/user/login';
+              } else {
+                  alert(data.message);
+              }
+          })
+          .catch(error => {
+              console.error('Error deleting account:', error);
+              alert('An error occurred while deleting your account.');
+          });
+      }
+  });
+</script>
+        <% } else { %>
+            <p>No data available.</p>
+          <% } %>
+</body>
+</html>

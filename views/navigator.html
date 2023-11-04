@@ -1,0 +1,52 @@
+<!-- JQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css" />
+<script>
+    function onClickSearch() {
+        let keywords = $('#search-keyword').val();
+        window.location.href = `/goods/search?keywords=${keywords}`;
+    }
+</script>
+<script>
+    function goToExchangePage() {
+        window.location.href = '/exchange'; // 거래소 페이지로 이동
+    }
+
+    function goToMarketPage() {
+        window.location.href = '/market'; // 마켓 페이지로 이동
+    }
+
+    function goToMainPage() {
+        window.location.href = '/';
+    }
+
+    function goToMyPage() {
+        window.location.href = '/mypage';
+    }
+    function goToChat() {
+        window.location.href = `/userMessages`;
+    }
+    
+</script>
+
+<header>
+    <div class="header">
+        <nav class="navigator">
+            <ul class="menu">
+                <li><a href="#" onclick="goToMainPage()">홈</a></li>
+                <li><a href="#" onclick="goToExchangePage()">거래소</a></li>
+                <li><a href="#" onclick="goToMarketPage()">마켓</a></li>
+                <li><a href="#" onclick="goToMyPage()">마이페이지</a></li>
+                <li><a href="#" onclick="goToChat()">채팅</a></li>
+            </ul>
+            <div class="search-box">
+                <input id="search-keyword" placeholder="검색어를 입력하세요.">
+                <button id="search-button" class="fa fa-search" type="button" onclick="onClickSearch()"></button>
+            </div>
+        </nav>
+
+    </div>
+</header>

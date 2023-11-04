@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css"/>
+    <style>
+        /* google font: Noto Sans KR */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap');
+
+        :root {
+            --color-signature: #3585c1;
+            --color-carrot-market: #ff8a3d;
+            --color-joonggonara: #e8344e;
+            --color-hello-market: #0484f6;
+
+            --white-normal: #fafafa;
+            --white-dark: #f3f3f3;
+
+            --purple-normal: #a238d9;
+            --purple-highlight: #C338FA;
+
+            --black-normal: #18191A;
+
+            --grey-normal: #242526;
+            --grey-light: #3a3b3c;
+            --grey-lighter: #ACAFB3;
+
+            --red-normal: #ff0000;
+
+            --text-smaller: 0.8rem;
+            --text-small: 1.1rem;
+            --text-normal: 1.25rem;
+            --text-littlebig: 2rem;
+            --text-big: 3rem;
+            --text-ultrabig: 5rem;
+        }
+
+        * {
+            margin: 0px;
+            padding: 0px;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-size: 10px;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .wrap {
+            width: 800px;
+            margin: 300px auto auto;
+            text-align: center;
+        }
+
+        #header {
+            text-align: left;
+
+        }
+
+        #header > h1 {
+            display: inline-block;
+            font-weight: normal;
+            font-size: var(--text-littlebig);
+            color: var(--black-normal);
+        }
+
+        #back-button {
+            background-color: transparent;
+            display: inline-block;
+            border: none;
+            padding-top: 0px;
+            padding-left: 5px;
+            padding-right: 10px;
+            color: var(--black-normal);
+        }
+
+        .big-button-box {
+            margin-top: 20px;
+        }
+
+        .big-button {
+            background-color: var(--color-signature);
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            padding: 10px 0;
+
+            color: var(--white-normal);
+            font-weight: normal;
+            font-size: var(--text-normal);
+        }
+
+        #delete-account-button {
+            margin-top: 20px;
+            background-color: transparent;
+            border: 1px solid var(--red-normal);
+            color: var(--red-normal);
+        }
+
+    </style>
+    
+</head>
+<body>
+    <div class="wrap">
+        <div id="header">
+            <button id="back-button" class="fas fa-angle-left fa-3x"  type="button"></button>
+            <h1>안녕하세요, <%= user_id %> 님!</h1>
+        </div>
+        <div>
+            <div class="big-button-box">
+                <button class="big-button" id="view-liked-button">찜 목록 확인</button>
+            </div>
+    
+            <div class="big-button-box">
+                <button class="big-button" id="edit-button">회원 정보 수정</button>
+            </div>
+    
+            <div class="big-button-box">
+                <button id="delete-account-button" class="big-button">탈퇴하기</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('view-liked-button').addEventListener('click', function() {
+            const userId = '<%= user_id %>';
+            window.location.href = `/user/${userId}/liked`; // 해당 URL로 이동
+        });     
+        
+    document.getElementById('edit-button').addEventListener('click', function() {
+        const userId = '<%= user_id %>';
+        window.location.href = `/user/${userId}/enter-password`;
+    });
+    document.getElementById('delete-account-button').addEventListener('click', function() {
+        if (confirm("탈퇴하시겠습니까?")) {
+            const userId = '<%= user_id %>';
+            // Send a POST request to delete the user account
+            fetch(`/user/${userId}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ userId: userId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    // Redirect the user to the login page after successful account deletion
+                    window.location.href = '/user/login';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting account:', error);
+                alert('An error occurred while deleting your account.');
+            });
+        }
+    });
+</script>
+</body>
+</html>

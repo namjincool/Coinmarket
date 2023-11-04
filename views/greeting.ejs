@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>환영합니다!</title>
+
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css"/>
+    <style>
+        /* google font: Noto Sans KR */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap');
+
+        :root {
+            --color-signature: #3585c1;
+            --color-carrot-market: #ff8a3d;
+            --color-joonggonara: #e8344e;
+            --color-hello-market: #0484f6;
+
+            --white-normal: #fafafa;
+            --white-dark: #f3f3f3;
+
+            --purple-normal: #a238d9;
+            --purple-highlight: #C338FA;
+
+            --black-normal: #18191A;
+
+            --grey-normal: #242526;
+            --grey-light: #3a3b3c;
+            --grey-lighter: #ACAFB3;
+
+            --text-smaller: 0.8rem;
+            --text-small: 1.1rem;
+            --text-normal: 1.25rem;
+            --text-littlebig: 2rem;
+            --text-big: 3rem;
+            --text-ultrabig: 5rem;
+        }
+
+        * {
+            margin: 0px;
+            padding: 0px;
+            box-sizing: content-box;
+        }
+
+        body {
+            height: 100%;
+            background-image: url('../static/main_background.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            font-size: 10px;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        .wrap {
+            width: 500px;
+            margin: 500px auto;
+            text-align: center;
+        }
+
+        #header {
+            text-align: left;
+        }
+
+        #header > img {
+            float: right;
+        }
+
+        #header > h1, #header > h2 {
+            display: inline-block;
+            color: var(--black-normal);
+        }
+
+        #header > h1 {
+            font-weight: normal;
+            font-size: var(--text-littlebig);
+        }
+
+        #header > h2 {
+            font-weight: lighter;
+            font-size: var(--text-normal);
+        }
+
+    </style>
+
+    <script>
+
+        $(document).ready(function () {
+            setTimeout(() => window.location.href = '/user/login', 3000)
+        });
+
+    </script>
+</head>
+<body>
+<div class="wrap">
+    <div id="header">
+        <img src="../static/greeting.png" alt="title">
+        <h1>가입이 완료되었습니다</h1><br>
+        <h2>어서 배에 타세요!</h2><br>
+        <h2>원하는 물건들을 실으러 떠납시다</h2>
+    </div>
+</div>
+
+</body>
+</html>

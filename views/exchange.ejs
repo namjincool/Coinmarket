@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://unpkg.com/lightweight-charts@latest/dist/lightweight-charts.standalone.production.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+
+  
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://fonts.google.com/?subset=korean&noto.script=Kore">
+  <title>API Data</title>
+  <style>
+    .container{
+      margin-top: 100px;
+      display: flex;
+      flex-direction: row;
+      width: 100%; /* 부모 요소 너비를 100%로 설정 */
+    }
+    /* 페이지 내용 스타일링 */
+    .chart-container {
+      flex: 1;
+      margin-right: 10px;
+    }
+  
+    .chart-container #chartContainer {
+      width: 75%;
+      height: 330px;
+      position: relative;
+    }
+  
+    .chart-container #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.7);
+      pointer-events: none;
+    }
+    
+    .chart-container button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    .time_buttons{
+      margin-top: 100px; 
+    }
+    .chart-container h2 {
+      font-size: 20px;
+      margin-top: 10px;
+    }
+  
+    .chart-container input[type="text"] {
+      width: 95%;
+      padding: 10px;
+      margin-top: 5px;
+    }
+  
+    .chart-container button[type="submit"] {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+    .table-container {
+      overflow-y: auto;
+      flex: 1;  
+      height: 800px;
+      width: 100%; /* 전체 너비를 차지하도록 설정 */
+      font-size: 11px; /* 원하는 글자 크기로 설정 */
+    }
+    
+    .table-container table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    
+    .table-container th, .table-container td {
+      border: 1px solid #ddd;
+      padding: 4px; /* 셀 내부 여백 조정 */
+      text-align: left;
+    }
+    
+    .table-container th {
+      background-color: #f2f2f2;
+    }
+    
+    .table-container tr:hover {
+      background-color: #f5f5f5;
+    }
+    
+  
+    
+  </style>
+</head>
+<body>
+  <%- include('navigator.html') %>
+  <% if (formattedValues.length> 0 && marketDataK.length > 0) { %>
+      <!-- 차트를 왼쪽에 배치 -->
+      <div class="container">
+        <!-- 차트를 왼쪽에 배치 -->
+        <div class="chart-container">
+          <div id="chartContainer">
+            <div id="overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.7); pointer-events: none;"></div>
+          </div>
+          <!-- 버튼 등 추가 컨트롤들 -->
+          <div class="time_buttons">
+            <button id="btn1" data-minutes="1">1분</button>
+            <button id="btn10" data-minutes="10">10분</button>
+            <button id="btn30" data-minutes="30">30분</button>
+            <button id="btn60" data-minutes="60">60분</button>
+          </div>
+
+          <h2>선택한코인 : <span id="selectedMarketField"></span></h2>
+          
+          <h2>현재가 :<span id="selectedPriceField"></span></h2>
+          
+          <h2>구매가격 : <span id="currentPriceSpan">0</span></h2>
+         
+          <h2>구매 갯수  <span id="coincount"></span></h2>
+      <form id="orderForm" action="/place-order" method="POST">
+        <label for="price"></label>
+        <select id="ordercoin" name="ordercoin" for="ordercoin">
+          <option value="BTC">BTC</option>
+          <option value="ETH">ETH</option>
+          <option value="NEO">NEO</option>
+          <option value="MTL">MTL</option>
+          <option value="XRP">XRP</option>
+          <option value="ETC">ETC</option>
+          <option value="SNT">SNT</option>
+          <option value="WAVES">WAVES</option>
+          <option value="XEM">XEM</option>
+          <option value="QTUM">QTUM</option>
+          <option value="LSK">LSK</option>
+          <option value="STEEM">STEEM</option>
+          <option value="XLM">XLM</option>
+          <option value="ARDR">ARDR</option>
+          <option value="ARK">ARK</option>
+          <option value="STORJ">STORJ</option>
+          <option value="GRS">GRS</option>
+          <option value="ADA">ADA</option>
+          <option value="SBD">SBD</option>
+          <option value="POWR">POWR</option>
+          <option value="BTG">BTG</option>
+          <option value="ICX">ICX</option>
+          <option value="EOS">EOS</option>
+          <option value="TRX">TRX</option>
+          <option value="SC">SC</option>
+          <option value="ONT">ONT</option>
+          <option value="ZIL">ZIL</option>
+          <option value="POLYX">POLYX</option>
+          <option value="ZRX">ZRX</option>
+          <option value="LOOM">LOOM</option>
+          <option value="BCH">BCH</option>
+          <option value="BAT">BAT</option>
+          <option value="IOST">IOST</option>
+          <option value="RFR">RFR</option>
+          <option value="CVC">CVC</option>
+          <option value="IQ">IQ</option>
+          <option value="IOTA">IOTA</option>
+          <option value="HIFI">HIFI</option>
+          <option value="ONG">ONG</option>
+          <option value="GAS">GAS</option>
+          <option value="UPP">UPP</option>
+          <option value="ELF">ELF</option>
+          <option value="KNC">KNC</option>
+          <option value="BSV">BSV</option>
+          <option value="THETA">THETA</option>
+          <option value="QKC">QKC</option>
+          <option value="BTT">BTT</option>
+          <option value="MOC">MOC</option>
+          <option value="ENJ">ENJ</option>
+          <option value="TFUEL">TFUEL</option>
+          <option value="MANA">MANA</option>
+          <option value="ANKR">ANKR</option>
+          <option value="AERGO">AERGO</option>
+          <option value="ATOM">ATOM</option>
+          <option value="TT">TT</option>
+          <option value="CRE">CRE</option>
+          <option value="MBL">MBL</option>
+          <option value="WAXP">WAXP</option>
+          <option value="HBAR">HBAR</option>
+          <option value="MED">MED</option>
+          <option value="MLK">MLK</option>
+          <option value="STPT">STPT</option>
+          <option value="ORBS">ORBS</option>
+          <option value="VET">VET</option>
+          <option value="CHZ">CHZ</option>
+          <option value="STMX">STMX</option>
+          <option value="DKA">DKA</option>
+          <option value="HIVE">HIVE</option>
+          <option value="KAVA">KAVA</option>
+          <option value="AHT">AHT</option>
+          <option value="LINK">LINK</option>
+          <option value="XTZ">XTZ</option>
+          <option value="BORA">BORA</option>
+          <option value="JST">JST</option>
+          <option value="CRO">CRO</option>
+          <option value="TON">TON</option>
+          <option value="SXP">SXP</option>
+          <option value="HUNT">HUNT</option>
+          <option value="PLA">PLA</option>
+          <option value="DOT">DOT</option>
+          <option value="MVL">MVL</option>
+          <option value="STRAX">STRAX</option>
+          <option value="AQT">AQT</option>
+          <option value="GLM">GLM</option>
+          <option value="SSX">SSX</option>
+          <option value="META">META</option>
+          <option value="FCT2">FCT2</option>
+          <option value="CBK">CBK</option>
+          <option value="SAND">SAND</option>
+          <option value="HPO">HPO</option>
+          <option value="DOGE">DOGE</option>
+          <option value="STRK">STRK</option>
+          <option value="PUNDIX">PUNDIX</option>
+          <option value="FLOW">FLOW</option>
+          <option value="DAWN">DAWN</option>
+          <option value="AXS">AXS</option>
+          <option value="STX">STX</option>
+          <option value="XEC">XEC</option>
+          <option value="SOL">SOL</option>
+          <option value="MATIC">MATIC</option>
+          <option value="AAVE">AAVE</option>
+          <option value="1INCH">1INCH</option>
+          <option value="ALGO">ALGO</option>
+          <option value="NEAR">NEAR</option>
+          <option value="AVAX">AVAX</option>
+          <option value="T">T</option>
+          <option value="CELO">CELO</option>
+          <option value="GMT">GMT</option>
+          <option value="APT">APT</option>
+          <option value="SHIB">SHIB</option>
+          <option value="MASK">MASK</option>
+          <option value="ARB">ARB</option>
+          <option value="EGLD">EGLD</option>
+          <option value="SUI">SUI</option>
+          <option value="GRT">GRT</option>
+          <option value="BLUR">BLUR</option>
+          <option value="IMX">IMX</option>
+        </select>
+        <input type="text" id="price" name="price" required oninput="updatePrice()">
+        <button type="submit">구매 하기</button>
+      </form>
+      <script>
+        document.getElementById("orderForm").addEventListener("submit", function (event) {
+          alert('구매 주문이 성공적으로 제출되었습니다.');
+          setTimeout(function () {
+            window.location.reload(true);
+          }, 1000);
+        });
+      </script>
+      <form id="sellForm" action="/sell-order" method="POST" >
+        <select id="sellcoin" name="sellcoin" for="sellcoin">
+          <option value="BTC">BTC</option>
+          <option value="ETH">ETH</option>
+          <option value="NEO">NEO</option>
+          <option value="MTL">MTL</option>
+          <option value="XRP">XRP</option>
+          <option value="ETC">ETC</option>
+          <option value="SNT">SNT</option>
+          <option value="WAVES">WAVES</option>
+          <option value="XEM">XEM</option>
+          <option value="QTUM">QTUM</option>
+          <option value="LSK">LSK</option>
+          <option value="STEEM">STEEM</option>
+          <option value="XLM">XLM</option>
+          <option value="ARDR">ARDR</option>
+          <option value="ARK">ARK</option>
+          <option value="STORJ">STORJ</option>
+          <option value="GRS">GRS</option>
+          <option value="ADA">ADA</option>
+          <option value="SBD">SBD</option>
+          <option value="POWR">POWR</option>
+          <option value="BTG">BTG</option>
+          <option value="ICX">ICX</option>
+          <option value="EOS">EOS</option>
+          <option value="TRX">TRX</option>
+          <option value="SC">SC</option>
+          <option value="ONT">ONT</option>
+          <option value="ZIL">ZIL</option>
+          <option value="POLYX">POLYX</option>
+          <option value="ZRX">ZRX</option>
+          <option value="LOOM">LOOM</option>
+          <option value="BCH">BCH</option>
+          <option value="BAT">BAT</option>
+          <option value="IOST">IOST</option>
+          <option value="RFR">RFR</option>
+          <option value="CVC">CVC</option>
+          <option value="IQ">IQ</option>
+          <option value="IOTA">IOTA</option>
+          <option value="HIFI">HIFI</option>
+          <option value="ONG">ONG</option>
+          <option value="GAS">GAS</option>
+          <option value="UPP">UPP</option>
+          <option value="ELF">ELF</option>
+          <option value="KNC">KNC</option>
+          <option value="BSV">BSV</option>
+          <option value="THETA">THETA</option>
+          <option value="QKC">QKC</option>
+          <option value="BTT">BTT</option>
+          <option value="MOC">MOC</option>
+          <option value="ENJ">ENJ</option>
+          <option value="TFUEL">TFUEL</option>
+          <option value="MANA">MANA</option>
+          <option value="ANKR">ANKR</option>
+          <option value="AERGO">AERGO</option>
+          <option value="ATOM">ATOM</option>
+          <option value="TT">TT</option>
+          <option value="CRE">CRE</option>
+          <option value="MBL">MBL</option>
+          <option value="WAXP">WAXP</option>
+          <option value="HBAR">HBAR</option>
+          <option value="MED">MED</option>
+          <option value="MLK">MLK</option>
+          <option value="STPT">STPT</option>
+          <option value="ORBS">ORBS</option>
+          <option value="VET">VET</option>
+          <option value="CHZ">CHZ</option>
+          <option value="STMX">STMX</option>
+          <option value="DKA">DKA</option>
+          <option value="HIVE">HIVE</option>
+          <option value="KAVA">KAVA</option>
+          <option value="AHT">AHT</option>
+          <option value="LINK">LINK</option>
+          <option value="XTZ">XTZ</option>
+          <option value="BORA">BORA</option>
+          <option value="JST">JST</option>
+          <option value="CRO">CRO</option>
+          <option value="TON">TON</option>
+          <option value="SXP">SXP</option>
+          <option value="HUNT">HUNT</option>
+          <option value="PLA">PLA</option>
+          <option value="DOT">DOT</option>
+          <option value="MVL">MVL</option>
+          <option value="STRAX">STRAX</option>
+          <option value="AQT">AQT</option>
+          <option value="GLM">GLM</option>
+          <option value="SSX">SSX</option>
+          <option value="META">META</option>
+          <option value="FCT2">FCT2</option>
+          <option value="CBK">CBK</option>
+          <option value="SAND">SAND</option>
+          <option value="HPO">HPO</option>
+          <option value="DOGE">DOGE</option>
+          <option value="STRK">STRK</option>
+          <option value="PUNDIX">PUNDIX</option>
+          <option value="FLOW">FLOW</option>
+          <option value="DAWN">DAWN</option>
+          <option value="AXS">AXS</option>
+          <option value="STX">STX</option>
+          <option value="XEC">XEC</option>
+          <option value="SOL">SOL</option>
+          <option value="MATIC">MATIC</option>
+          <option value="AAVE">AAVE</option>
+          <option value="1INCH">1INCH</option>
+          <option value="ALGO">ALGO</option>
+          <option value="NEAR">NEAR</option>
+          <option value="AVAX">AVAX</option>
+          <option value="T">T</option>
+          <option value="CELO">CELO</option>
+          <option value="GMT">GMT</option>
+          <option value="APT">APT</option>
+          <option value="SHIB">SHIB</option>
+          <option value="MASK">MASK</option>
+          <option value="ARB">ARB</option>
+          <option value="EGLD">EGLD</option>
+          <option value="SUI">SUI</option>
+          <option value="GRT">GRT</option>
+          <option value="BLUR">BLUR</option>
+          <option value="IMX">IMX</option>
+        </select>
+        <input type="text" id="volume" name="volume" required>
+        <button type="submit">판매 하기</button>
+      </form>
+        <script>
+          document.getElementById("sellForm").addEventListener("submit", function (event) {
+            alert('판매 주문이 성공적으로 제출되었습니다.');
+            setTimeout(function () {
+              window.location.reload(true);
+            }, 1000);
+          });
+        </script>
+        </div>
+        <!-- 테이블을 오른쪽에 배치 -->
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="sortTable('marketEnglishName')">마켓 이름</th>
+                <th onclick="sortTable('marketEnglishName')">마켓 영문 이름</th>
+                <th onclick="sortTableByPrice()">최신 가격</th>
+                <th>전일 종가</th>
+                <th onclick="sortTableByChange()">전일 대비</th>
+              </tr>
+            </thead>
+            <tbody id="marketTableBody">
+              <% marketDataK.forEach((market, index)=> { %>
+                <!-- 오류 신경 안 써도 되는 부분 -->
+                <tr onclick="selectMarket('<%= market.market %>', <%= index %>)">
+                  <td><%= market.market %></td>
+                  <td><%= marketEnglishName[index] %></td>
+                  <td id="price<%= index %>"><span class="price-cell"><%= tickerData[index].trade_price || '' %></span></td>
+                  <td><%= tickerData[index].prev_closing_price || '' %></td>
+                  <td id="change<%= index %>"><%= tickerData[index].signed_change_price || '' %><br><%= tickerData[index].signed_change_rate || '' %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>        
+      </div>
+    <% } else { %>
+      <p>No data available.</p>
+      <% } %>
+</body>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const rows = document.querySelectorAll("#marketTableBody tr");
+    rows.forEach(row => {
+      const priceCell = row.querySelector(".price-cell");
+      const openingPriceCell = row.querySelector("td:nth-child(5)");
+      const tradePrice = parseFloat(priceCell.textContent);
+      const openingPrice = parseFloat(openingPriceCell.textContent);
+
+      if (tradePrice < openingPrice) {
+        priceCell.style.color = "blue";
+      } else if (tradePrice > openingPrice) {
+        priceCell.style.color = "red";
+      }
+    });
+  });
+</script>
+<script>
+  var rows = document.querySelectorAll('#accountTableBody tr');
+// Loop through each row
+rows.forEach(function(row) {
+  // Get the first td in the current row
+  var firstCell = row.querySelector('td:first-child');
+  
+  // Check if the content of the first td is "KRW-KRW"
+  if (firstCell.textContent.trim() === "KRW-KRW") {
+    // If it is, get the content of the second td
+    var secondCell = row.querySelector('td:nth-child(2)');
+    
+    // Extract the content and store it in a variable
+    var content = secondCell.textContent.trim();
+    
+    // Now, 'content' contains the value you want
+    // You can do whatever you want with this value
+    console.log("Value in the second cell: " + content);
+  }
+});
+</script>
+<script>
+  function selectMarket(market, index) {
+    // "KRW-"를 제외한 마켓 이름을 얻습니다.
+    const selectedMarket = market.slice(4);
+    const selectedMarket2 = market;
+    console.log(selectedMarket);
+    const selectedPrice = $('#price' + index).text();
+    console.log(selectedMarket);    // ordercoin select 요소를 찾아 선택된 마켓으로 설정합니다.
+    $('#ordercoin').val(selectedMarket);
+    $('#sellcoin').val(selectedMarket);
+    $('#selectedMarketField').text(selectedMarket);
+    $('#selectedPriceField').text(selectedPrice);
+    sendCoinNameToServer(selectedMarket2);
+    updatePrice()
+  }
+  function sendCoinNameToServer(coinname2) {
+    $.ajax({
+      type: 'POST',
+      url: '/sendCoinName',
+      contentType: 'application/json',
+      data: JSON.stringify({ coinname2: coinname2 }),
+      success: function (response) {
+        console.log('Coin name sent to server: ' + coinname2);
+        // 서버에서 필요한 작업이 끝난 후 클라이언트에게 응답이 왔을 때
+        // 필요한 작업을 이곳에서 수행합니다.
+        dr(coinname2);
+      },
+      error: function (error) {
+        console.error('Error sending coin name to server: ' + error);
+      }
+    });
+  }
+  function dr(coinname2) {
+    // 서버에서 필요한 작업을 수행한 후에 이 함수가 호출됩니다.
+    const minutes = 60;
+    console.log('Received coinname2 on the client: ' + coinname2);
+    if (chart) {
+      chart.remove();
+    }
+    chart = LightweightCharts.createChart(chartContainer, {
+      width: 800,
+      height: 400,
+    });
+    drawCandlestickChart(minutes);
+  }
+</script>
+<script>
+$(document).ready(function() {
+  // 테이블의 tbody 요소를 선택합니다.
+  var tableBody = $('#accountTableBody');
+  tableBody.find('tr').each(function() {
+    var currencyName = $(this).find('td:first').text(); // 첫 번째 열의 텍스트 (화폐명)
+    if (currencyName !== 'KRW-KRW') {
+      $(this).hide();
+    }
+  });
+});
+</script>
+<script>
+  $(document).ready(function () {
+
+  });
+</script>
+<script>
+  const ws = new WebSocket('ws://localhost:8082');
+  ws.onopen = () => {
+    //    console.log('WebSocket connection established');
+    requestAccountData();
+  };
+
+  ws.onmessage = (event) => {
+    //  console.log('Received message from server:', event.data);
+    const marketData = JSON.parse(event.data);
+    //  console.log("mar",marketData);
+
+    if (marketData.type === 'accountData') {
+      const formattedValues = marketData.data;
+      updateAccountTable(formattedValues);
+
+    } else {
+      updateMarketData(marketData);
+    }
+  };
+
+  ws.onclose = () => {
+    console.log('WebSocket connection closed');
+  };
+
+  function requestAccountData() {
+    // 서버로 데이터 요청 보내고 처리하는 로직 추가
+    // 아래는 axios를 사용하는 예시입니다. 필요에 따라 수정하셔야합니다.
+    axios.get('/api/accountData') // 서버의 API 엔드포인트를 사용한다고 가정하고 URL을 '/api/accountData'로 가정
+      .then(response => {
+        const marketData = response.data;
+
+        updateAccountTable(marketData);
+        //  console.log("Received account data from server:", marketData);
+      })
+      .catch(error => {
+        console.error('Error fetching account data:', error);
+      });
+  }
+
+  function updateAccountTable(data, index) {
+    const tableBody = document.querySelector('#accountTableBody');
+    tableBody.innerHTML = ''; // Clear the table body
+
+    if (data.length > 0) {
+      data.forEach(row => {
+        const tableRow = document.createElement('tr');
+
+        // Add KRW- prefix to the currency name
+        const currencyCell = document.createElement('td');
+        currencyCell.textContent = `KRW-${row[0]}`;
+        tableRow.appendChild(currencyCell);
+
+        // Add other columns
+        for (let i = 1; i < row.length; i++) {
+          const cell = document.createElement('td');
+          cell.textContent = row[i];
+          tableRow.appendChild(cell);
+        }
+
+        // Calculate and add the amount column
+        const amountCell = document.createElement('td');
+        if (row[0] === 'KRW') {
+          amountCell.textContent = row[1]; // If '화폐명' is 'KRW', display '보유수량'
+        } else {
+          const holdingAmount = parseFloat(row[1]);
+          const averagePrice = parseFloat(row[3]);
+          const calculatedAmount = (holdingAmount * averagePrice).toFixed(2);
+          amountCell.textContent = calculatedAmount;
+        }
+        tableRow.appendChild(amountCell);
+
+        tableBody.appendChild(tableRow);
+      });
+    } else {
+      const noDataRow = document.createElement('tr');
+      const noDataCell = document.createElement('td');
+      noDataCell.setAttribute('colspan', 7); // Considering the additional '금액' column
+      noDataCell.textContent = 'No account data available';
+      noDataRow.appendChild(noDataCell);
+      tableBody.appendChild(noDataRow);
+    }
+  }
+
+
+
+  function updateMarketData(marketData) {
+    marketData.forEach((data, index) => {
+      const priceCell = document.getElementById(`price${index}`);
+      const changeCell = document.getElementById(`change${index}`);
+      const openingPriceCell = document.querySelector(`#marketTableBody tr:nth-child(${index + 1}) td:nth-child(4)`);
+
+      if (priceCell && changeCell && openingPriceCell) {
+        const tradePrice = parseFloat(priceCell.textContent);
+        const openingPrice = parseFloat(openingPriceCell.textContent);
+        console.log(tradePrice,openingPrice);
+        if (tradePrice < openingPrice) {
+          priceCell.style.color = 'blue';
+        } else if (tradePrice > openingPrice) {
+          priceCell.style.color = 'red';
+        } else if (tradePrice == openingPrice) {
+          priceCell.style.color = 'black';
+        }
+
+        const prevPrice = parseFloat(priceCell.textContent);
+        const currentPrice = parseFloat(data.trade_price);
+        const priceDiff = currentPrice - prevPrice;
+
+        if (priceDiff > 0) {
+          priceCell.style.color = 'red';
+          priceCell.classList.add('blink-red');
+        } else if (priceDiff < 0) {
+          priceCell.style.color = 'blue';
+          priceCell.classList.add('blink-blue');
+        }
+
+        priceCell.textContent = data.trade_price || '';
+        setTimeout(() => {
+          priceCell.classList.remove('blink-red', 'blink-blue');
+        }, 1000);
+
+
+        // Handle special case for displaying change price and rate
+        const changePrice = parseFloat(data.signed_change_price || '0');
+        const changeRate = parseFloat(data.signed_change_rate || '0');
+
+        const adjustedChangeRate = (changeRate * 100).toFixed(2);
+        const formattedChangeRate = `${adjustedChangeRate}%`;
+
+        if (changePrice == 0 || isNaN(changePrice)) {
+          changeCell.textContent = `-0, ${formattedChangeRate}`;
+          changeCell.style.color = 'black';
+        } else if (changePrice < 0) {
+          changeCell.textContent = `▼ ${changePrice} ${formattedChangeRate}`;
+          changeCell.style.color = 'blue';
+        } else if (changePrice > 0) {
+          changeCell.textContent = `▲ ${changePrice} ${formattedChangeRate}`;
+          changeCell.style.color = 'red';
+        }
+      }
+    });
+  }
+
+
+
+</script>
+
+<script>
+  function populateAssetValue() {
+    const btcAsset = '<%= formattedValues.find(row => row[0] === "BTC")?.[1] || "" %>';
+    const volumeInput = document.getElementById('volume');
+    volumeInput.value = btcAsset;
+  }
+
+  function showBTCAssetQuantity() {
+    const btcAssetQuantity = '<%= formattedValues.find(row => row[0] === "BTC")?.[1] || "" %>';
+    const btcAssetQuantityText = document.getElementById('btcAssetQuantity');
+    btcAssetQuantityText.textContent = btcAssetQuantity;
+  }
+
+  populateAssetValue();
+
+  showBTCAssetQuantity();
+</script>
+<script>
+
+  // 정렬 방향을 추적할 변수
+// 정렬 방향을 추적할 변수 (가격 높은 순으로 정렬)
+let ascendingPrice = false;
+
+// 정렬 방향을 추적할 변수 (전일 대비 높은 순으로 정렬)
+let ascendingChange = false;
+
+function sortTableByPrice() {
+  const tableBody = document.getElementById("marketTableBody");
+  const rows = Array.from(tableBody.getElementsByTagName("tr"));
+
+  // 테이블 헤더의 두 번째 셀(최신 가격)을 기준으로 정렬
+  rows.sort((a, b) => {
+    const priceA = parseFloat(a.getElementsByTagName("td")[2].textContent) || 0;
+    const priceB = parseFloat(b.getElementsByTagName("td")[2].textContent) || 0;
+
+    return ascendingPrice ? priceB - priceA : priceA - priceB;
+  });
+
+  // 정렬된 행을 다시 테이블에 추가
+  tableBody.innerHTML = '';
+  rows.forEach((row) => {
+    tableBody.appendChild(row);
+  });
+
+  // 정렬 방향을 변경
+  ascendingPrice = !ascendingPrice;
+}
+
+function sortTableByChange() {
+  const tableBody = document.getElementById("marketTableBody");
+  const rows = Array.from(tableBody.getElementsByTagName("tr"));
+
+  // 테이블 헤더의 다섯 번째 셀(전일 대비)을 기준으로 정렬
+  rows.sort((a, b) => {
+    const changeTextA = a.getElementsByTagName("td")[4].textContent;
+    const changeTextB = b.getElementsByTagName("td")[4].textContent;
+
+    const changeA = parseFloat(changeTextA.substring(changeTextA.lastIndexOf(' ') + 1).replace('%', '')) || 0;
+    const changeB = parseFloat(changeTextB.substring(changeTextB.lastIndexOf(' ') + 1).replace('%', '')) || 0;
+
+    return ascendingChange ? changeB - changeA : changeA - changeB;
+  });
+
+  // 정렬된 행을 다시 테이블에 추가
+  tableBody.innerHTML = '';
+  rows.forEach((row) => {
+    tableBody.appendChild(row);
+  });
+
+  // 정렬 방향을 변경
+  ascendingChange = !ascendingChange;
+}
+
+let sortDirection = 'asc';
+
+function sortTable(columnName) {
+  const tableBody = document.getElementById("marketTableBody");
+  const rows = Array.from(tableBody.getElementsByTagName("tr"));
+
+  // 정렬 기준 열의 인덱스를 찾음
+  let columnIndex;
+  switch (columnName) {
+    case 'marketName':
+      columnIndex = 0;
+      break;
+    case 'marketEnglishName':
+      columnIndex = 1;
+      break;
+    case 'price':
+      columnIndex = 2;
+      break;
+    case 'change':
+      columnIndex = 4;
+      break;
+    default:
+      return;
+  }
+
+  // 정렬 방향에 따라 정렬
+  rows.sort((a, b) => {
+    const valueA = a.getElementsByTagName("td")[columnIndex].textContent;
+    const valueB = b.getElementsByTagName("td")[columnIndex].textContent;
+
+    if (columnName === 'marketEnglishName') {
+      // '마켓 영문 이름' 열은 문자열로 비교
+      return sortDirection === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+    } else {
+      // 다른 열은 숫자로 비교 (예: 가격, 전일 대비)
+      const numA = parseFloat(valueA) || 0;
+      const numB = parseFloat(valueB) || 0;
+
+      return sortDirection === 'asc' ? numA - numB : numB - numA;
+    }
+  });
+
+  // 정렬된 행을 다시 테이블에 추가
+  tableBody.innerHTML = '';
+  rows.forEach((row) => {
+    tableBody.appendChild(row);
+  });
+
+  // 정렬 방향을 변경
+  sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+}
+</script>
+<script>
+  function updatePrice() {
+    const inputElement = document.getElementById("price");
+    const currentPriceSpan = document.getElementById("currentPriceSpan");
+    
+    const selectedPrice = parseFloat(selectedPriceField.textContent);
+    const inputValue = parseFloat(inputElement.value);
+    
+    if (!isNaN(selectedPrice) && !isNaN(inputValue) && inputValue !== 0) {
+      const result =  inputValue/selectedPrice;
+      coincount.textContent = result.toString();
+    } else {
+      coincount.textContent = "0";
+    }
+    currentPriceSpan.textContent = inputElement.value;
+  }
+</script>
+
+<script>
+  let chart = null;
+  document.addEventListener("DOMContentLoaded", () => {
+    const chartContainer = document.getElementById('chartContainer');
+    chart = LightweightCharts.createChart(chartContainer, {
+      width: 800,
+      height: 400,
+    });
+    drawCandlestickChart(60);
+  });
+  function drawCandlestickChart(minutes) {
+    const candlestickSeries = chart.addCandlestickSeries();
+    fetch(`/chart?minutes=${minutes}`)
+      .then(response => response.json())
+      .then(responseData => {
+        const chartData = responseData.chartData;
+        console.log(chartData);
+    
+        // 캔들 차트 데이터 업데이트
+        const candleData = chartData.map(entry => ({
+          timeScale: entry.candle_date_time_kst,
+          time: new Date(entry.timestamp).getTime(),
+          open: entry.opening_price, // 시가
+          high: entry.high_price, // 고가
+          low: entry.low_price, // 저가
+          close: entry.trade_price // 종가
+        }));
+        console.log(candleData);
+        // 데이터를 시간순으로 정렬
+        candleData.sort((a, b) => a.time - b.time);
+
+        // 데이터 설정
+        candlestickSeries.setData(candleData);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  // 버튼 클릭 이벤트 처리
+  document.getElementById('btn10').addEventListener('click', () => {
+    const minutes = document.getElementById('btn10').getAttribute('data-minutes');
+
+    // 이전 차트를 파기하고 새로운 차트를 그립니다.
+    if (chart) {
+      chart.remove();
+    }
+    chart = LightweightCharts.createChart(chartContainer, {
+      width: 800,
+      height: 400,
+    });
+    drawCandlestickChart(minutes);
+  });
+
+  document.getElementById('btn30').addEventListener('click', () => {
+    const minutes = document.getElementById('btn30').getAttribute('data-minutes');
+
+    // 이전 차트를 파기하고 새로운 차트를 그립니다.
+    if (chart) {
+      chart.remove();
+    }
+    chart = LightweightCharts.createChart(chartContainer, {
+      width: 800,
+      height: 400,
+    });
+    drawCandlestickChart(minutes);
+  });
+
+  document.getElementById('btn60').addEventListener('click', () => {
+    const minutes = document.getElementById('btn60').getAttribute('data-minutes');
+
+    // 이전 차트를 파기하고 새로운 차트를 그립니다.
+    if (chart) {
+      chart.remove();
+    }
+    chart = LightweightCharts.createChart(chartContainer, {
+      width: 800,
+      height: 400,
+    });
+    drawCandlestickChart(minutes);
+  });
+  document.getElementById('btn1').addEventListener('click', () => {
+    const minutes = document.getElementById('btn1').getAttribute('data-minutes');
+
+    // 이전 차트를 파기하고 새로운 차트를 그립니다.
+    if (chart) {
+      chart.remove();
+    }
+    chart = LightweightCharts.createChart(chartContainer, {
+      width: 800,
+      height: 400,
+    });
+    drawCandlestickChart(minutes);
+  });
+</script>
+
+</html>
